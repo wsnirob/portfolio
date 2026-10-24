@@ -36,13 +36,13 @@ const menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementByI
  try{
   const db=window.supabase.createClient('https://lcoizoxluixeatfhufls.supabase.co','sb_publishable_pL5aXEcR8hJ0WFrwUHBBWg_IMvlI1lj');
   const {data,error}=await db.from('portfolio_content').select('content').eq('id',1).maybeSingle();
-  const items=data?.content?.projects;if(error||!Array.isArray(items)||!items.length)return;
+  if(error)return;
+  const profile=(()=>{try{const u=new URL(data?.content?.profileImageUrl||'');return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}})();
+  const navPhoto=document.getElementById('profilePhotoNav');if(navPhoto&&profile){navPhoto.src=profile;navPhoto.style.display='block'}
+  const items=data?.content?.projects;if(!Array.isArray(items)||!items.length)return;
   const grid=document.getElementById('projectGrid');if(!grid)return;
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safe=s=>{try{const u=new URL(s);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}};
-  const profile=safe(data?.content?.profileImageUrl||'');
-  const navPhoto=document.getElementById('profilePhotoNav');
-  if(navPhoto&&profile){navPhoto.src=profile;navPhoto.style.display='block'}
   const visible=items.filter(p=>p.featured!==false);
   grid.innerHTML=visible.map((p,i)=>{
    const live=safe(p.liveUrl),source=safe(p.sourceUrl);
