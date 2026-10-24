@@ -29,4 +29,25 @@
 </main><footer class="footer"><div class="wrap footerInner"><a class="brand" href="#home"><span class="mark">N</span><span>NIROB<span style="color:var(--accent)">.</span></span></a><span>© <span id="year"></span> Nirob. Crafted with care.</span><div class="footerLinks"><a href="#services">Services</a><a href="#projects">Work</a><a href="https://mail.google.com/mail/?view=cm&fs=1&to=wsnirob1%40gmail.com">Email</a></div></div></footer>
 <script>
 const menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks');menuBtn.addEventListener('click',()=>navLinks.classList.toggle('open'));navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLinks.classList.remove('open')));document.getElementById('year').textContent=new Date().getFullYear();const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async()=>{
+ try{
+  const db=window.supabase.createClient('https://lcoizoxluixeatfhufls.supabase.co','sb_publishable_pL5aXEcR8hJ0WFrwUHBBWg_IMvlI1lj');
+  const {data,error}=await db.from('portfolio_content').select('content').eq('id',1).maybeSingle();
+  const items=data?.content?.projects;if(error||!Array.isArray(items)||!items.length)return;
+  const grid=document.getElementById('projectGrid');if(!grid)return;
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safe=s=>{try{const u=new URL(s);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}};
+  const visible=items.filter(p=>p.featured!==false);
+  grid.innerHTML=visible.map((p,i)=>{
+   const live=safe(p.liveUrl),source=safe(p.sourceUrl);
+   const pic=safe(p.imageUrl);
+   const visual=pic?'<img src="'+esc(pic)+'" alt="'+esc(p.name)+' project screenshot" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:12px">':'<div class="browser"><div class="browserBar"><i></i><i></i><i></i></div><div class="siteMock"><div class="tinybrand">'+esc(p.name)+'</div><h4>'+esc(p.name)+'</h4><p>'+esc(p.category)+'</p><div class="tile"></div></div></div>';
+   return '<article class="project reveal"><div class="projectVisual">'+visual+'</div><div class="projectBody"><div class="projectMeta"><span class="tag">'+esc(p.category)+'</span><span>'+String(i+1).padStart(2,'0')+'</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description)+'</p><div class="projectLinks">'+(live?'<a href="'+esc(live)+'" target="_blank" rel="noopener noreferrer">Live project ↗</a>':'')+(source?'<a href="'+esc(source)+'" target="_blank" rel="noopener noreferrer">Source ↗</a>':'')+'</div></div></article>';
+  }).join('');
+  grid.querySelectorAll('.reveal').forEach(el=>{if(typeof observer!=='undefined')observer.observe(el);else el.classList.add('visible')});
+ }catch(e){console.error('Portfolio project loading failed',e)}
+})();
 </script></body></html>
