@@ -50,6 +50,18 @@ body{background:#F8FAFC;color:#0F172A}
 .footer{color:#64748B}.footerInner{border-top-color:#E2E8F0}
 .menu{color:#0F172A;border-color:#E2E8F0}
 @media(max-width:600px){.links{background:#FFFFFF;border-bottom-color:#E2E8F0}}
+
+/* Click-to-enlarge project image viewer */
+.projectGallery img{cursor:zoom-in;transition:transform .2s ease}
+.projectGallery img:hover{transform:scale(1.025)}
+.imageLightbox{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(2,6,23,.88);backdrop-filter:blur(8px)}
+.imageLightbox.open{display:flex}
+.imageLightbox img{display:block;max-width:min(96vw,1500px);max-height:88vh;width:auto;height:auto;object-fit:contain;border-radius:10px;box-shadow:0 20px 80px #0008}
+.imageLightboxClose{position:absolute;top:14px;right:18px;width:46px;height:46px;border:1px solid #ffffff55;border-radius:50%;background:#0f172acc;color:#fff;font-size:30px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.imageLightboxHint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;background:transparent;font-size:13px;opacity:.85;pointer-events:none}
+.projectGallery img:focus-visible{outline:3px solid #2563EB;outline-offset:3px}
+@media(max-width:600px){.imageLightbox{padding:12px}.imageLightbox img{max-width:96vw;max-height:82vh}.imageLightboxClose{top:10px;right:10px;width:42px;height:42px}}
+
 </style>
 </head>
 <body>
@@ -105,4 +117,25 @@ const menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementByI
   grid.querySelectorAll('.reveal').forEach(el=>{if(typeof observer!=='undefined')observer.observe(el);else el.classList.add('visible')});
  }catch(e){console.error('Portfolio project loading failed',e)}
 })();
-</script></body></html>
+</script>
+<script>
+(()=>{
+ const box=document.createElement('div');
+ box.className='imageLightbox';
+ box.setAttribute('role','dialog');
+ box.setAttribute('aria-modal','true');
+ box.setAttribute('aria-label','Enlarged project image');
+ box.innerHTML='<button type="button" class="imageLightboxClose" aria-label="Close enlarged image">×</button><img alt="Enlarged project image"><div class="imageLightboxHint">Click outside the image or press Esc to close</div>';
+ document.body.appendChild(box);
+ const large=box.querySelector('img');
+ const closeBtn=box.querySelector('.imageLightboxClose');
+ let previousFocus=null;
+ function close(){box.classList.remove('open');large.removeAttribute('src');document.body.style.overflow='';if(previousFocus)previousFocus.focus();previousFocus=null}
+ function open(img){if(!img||!img.src)return;previousFocus=img;large.src=img.currentSrc||img.src;large.alt=img.alt||'Enlarged project image';box.classList.add('open');document.body.style.overflow='hidden';closeBtn.focus()}
+ document.addEventListener('click',e=>{const img=e.target.closest('.projectGallery img');if(img){open(img);return}if(e.target===box||e.target===closeBtn)close()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&box.classList.contains('open'))close()});
+ box.addEventListener('click',e=>{if(e.target===box)close()});
+})();
+</script>
+
+</body></html>
